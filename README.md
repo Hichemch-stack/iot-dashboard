@@ -2,7 +2,7 @@
 
 🌍 Présentation du projet
 AI Smart Environmental Monitoring Platform est une solution complète combinant :
-Plain Text1IoT + Cloud + Big Data + Intelligence Artificielle + Dashboard Web2``Show more lines
+PlaIoT + Cloud + Big Data + Intelligence Artificielle + Dashboard Web2``Show more lines
 Le projet permet de :
 
 collecter des données environnementales via une station ESP32 simulée (Wokwi)
