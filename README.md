@@ -221,19 +221,3 @@ Dashboard local uniquement
 
 👨‍💻 Auteur
 CHEBBI Hichem
-
-🎓 Projet académique
-Projet réalisé dans le cadre de :
-Plain Text1Sujet 7 – IoT Smart Monitoring + Big Data + AIShow more lines
-
-✅ Résultat
-Avec ce README, ton projet atteint :
-Plain Text1Niveau professionnel ✅2Niveau soutenance ✅3Niveau GitHub ✅4``Show more lines
-
-🔥 Si tu veux aller encore plus loin
-Je peux te générer :
-✅ requirements.txt optimal
-✅ version GitHub propre du projet
-✅ script d’installation automatique
-✅ slides PowerPoint soutenance
-✅ diagramme architecture (image pro)
