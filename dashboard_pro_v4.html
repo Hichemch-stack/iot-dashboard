@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Pro v4 - AI Smart Environmental Monitoring</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #eef4ff, #f8fafc);
+  padding: 35px;
+  color: #0f172a;
+}
+
+h1 {
+  color: #2563eb;
+  font-size: 44px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  margin-top: 38px;
+  font-size: 30px;
+  color: #111827;
+}
+
+.subtitle {
+  color: #64748b;
+  font-size: 16px;
+  margin-bottom: 22px;
+}
+
+.status {
+  background: white;
+  padding: 18px 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+  margin-bottom: 30px;
+  font-size: 18px;
+}
+
+.ok {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.error {
+  color: #dc2626;
+  font-weight: bold;
+}
+
+.warning {
+  color: #d97706;
+  font-weight: bold;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.card {
+  background: white;
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(15,23,42,0.08);
+  min-height: 140px;
+}
+
+.card-title {
+  font-size: 18px;
+  color: #475569;
+  margin-bottom: 14px;
+}
+
+.value {
+  font-size: 34px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.sub {
+  color: #64748b;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.full {
+  grid-column: span 4;
+}
+
+.half {
+  grid-column: span 2;
+}
+
+.badge {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.badge-normal {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-critical {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.diagnostic {
+  background: white;
+  border-radius: 18px;
+  padding: 22px;
+  font-size: 18px;
+  line-height: 1.6;
+  box-shadow: 0 10px 28px rgba(15,23,42,0.08);
+}
+
+.diag-normal {
+  border-left: 8px solid #16a34a;
+}
+
+.diag-warning {
+  border-left: 8px solid #d97706;
+}
+
+.diag-critical {
+  border-left: 8px solid #dc2626;
+}
+
+canvas {
+  width: 100%;
+  height: 300px;
+  background: white;
+  border-radius: 18px;
+}
+
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.heat-cell {
+  height: 42px;
+  border-radius: 10px;
+  color: white;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert-list {
+  background: white;
+  padding: 18px;
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(15,23,42,0.08);
+  max-height: 430px;
+  overflow-y: auto;
+}
+
+.alert-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  background: #f8fafc;
+}
+
+.alert-title {
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.alert-meta {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.progress {
+  height: 14px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 14px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #16a34a;
+}
+
+.footer {
+  margin-top: 35px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .full,
+  .half {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full,
+  .half {
+    grid-column: span 1;
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌍 AI Smart Environmental Monitoring</h1>
+<div class="subtitle">
+  Dashboard Pro v4 · ESP32 Wokwi · ThingSpeak · Flask IA v2 · Scikit-learn · MongoDB Atlas
+</div>
+
+<div class="status">
+  Backend IA : <span id="backendStatus" class="warning">En attente...</span><br>
+  ThingSpeak : <span id="thingSpeakStatus" class="warning">En attente...</span><br>
+  Stockage : <span id="storageMode">--</span><br>
+  Dernière mise à jour : <span id="lastUpdate">--</span>
+</div>
+
+<h2>📡 Données ThingSpeak</h2>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-title">Température DHT22</div>
+    <div id="temp" class="value">--</div>
+    <div class="sub">field1</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Humidité</div>
+    <div id="hum" class="value">--</div>
+    <div class="sub">field2</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Température LM35</div>
+    <div id="lm35" class="value">--</div>
+    <div class="sub">field3</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Luminosité</div>
+    <div id="lum" class="value">--</div>
+    <div class="sub">field4</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Mouvement PIR</div>
+    <div id="motion" class="value">--</div>
+    <div class="sub">field5</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Distance HC-SR04</div>
+    <div id="distance" class="value">--</div>
+    <div class="sub">field6</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Risk Score ESP32</div>
+    <div id="risk" class="value">--</div>
+    <div class="sub">field7</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Alert Code</div>
+    <div id="alertCode" class="value">--</div>
+    <div class="sub">field8</div>
+  </div>
+</div>
+
+<h2>🤖 Intelligence Artificielle</h2>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-title">ECI actuel</div>
+    <div id="eci" class="value">--</div>
+    <div class="sub">Environmental Criticality Index</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Décision IA</div>
+    <div id="decision" class="value">--</div>
+    <div id="decisionBadge" class="sub">--</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Anomalies détectées</div>
+    <div id="anomaly" class="value">--</div>
+    <div class="sub">Isolation Forest</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Prédiction température</div>
+    <div id="pred" class="value">--</div>
+    <div class="sub">Régression linéaire</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Data Quality Score</div>
+    <div id="quality" class="value">--</div>
+    <div class="progress">
+      <div id="qualityBar" class="progress-fill"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Records analysés</div>
+    <div id="recordsAnalyzed" class="value">--</div>
+    <div class="sub">Pandas processing</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Records sauvegardés</div>
+    <div id="recordsSaved" class="value">--</div>
+    <div class="sub">MongoDB Atlas</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Alertes IA</div>
+    <div id="alertsCount" class="value">--</div>
+    <div class="sub">/api/alerts</div>
+  </div>
+</div>
+
+<h2>📊 Statistiques MongoDB Atlas</h2>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-title">ECI moyen</div>
+    <div id="avgEci" class="value">--</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ECI maximum</div>
+    <div id="maxEci" class="value">--</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Risk moyen</div>
+    <div id="avgRisk" class="value">--</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Risk maximum</div>
+    <div id="maxRisk" class="value">--</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">NORMAL</div>
+    <div id="normalCount" class="value">--</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">WARNING</div>
+    <div id="warningCount" class="value">--</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">CRITICAL</div>
+    <div id="criticalCount" class="value">--</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Distance minimale</div>
+    <div id="minDistance" class="value">--</div>
+  </div>
+</div>
+
+<h2>📈 Courbes analytiques</h2>
+
+<div class="grid">
+  <div class="card half">
+    <div class="card-title">Température + moyenne glissante</div>
+    <canvas id="tempChart" width="650" height="300"></canvas>
+  </div>
+
+  <div class="card half">
+    <div class="card-title">ECI Score</div>
+    <canvas id="eciChart" width="650" height="300"></canvas>
+  </div>
+
+  <div class="card half">
+    <div class="card-title">Risk Score + moyenne glissante</div>
+    <canvas id="riskChart" width="650" height="300"></canvas>
+  </div>
+
+  <div class="card half">
+    <div class="card-title">Répartition décisions IA</div>
+    <canvas id="decisionChart" width="650" height="300"></canvas>
+  </div>
+</div>
+
+<h2>🔥 Heatmap ECI</h2>
+
+<div class="card full">
+  <div id="heatmap" class="heatmap"></div>
+</div>
+
+<h2>🧾 Diagnostic intelligent</h2>
+
+<div id="diagnostic" class="diagnostic diag-normal">
+  En attente des données...
+</div>
+
+<h2>🚨 Timeline alertes IA</h2>
+
+<div id="alertsList" class="alert-list">
+  En attente des alertes...
+</div>
+
+<div class="footer">
+  Dashboard Pro v4 · Sujet 7 · AI Smart Environmental Monitoring & Big Data Analytics Platform
+</div>
+
+<script>
+const CHANNEL_ID = "3406001";
+const READ_API_KEY = "UDJ2JHLMJ2UMKP81";
+const API_FLASK = "http://127.0.0.1:5000";
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = value === null || value === undefined ? "--" : value;
+}
+
+function fmt(value, decimals = 1) {
+  const n = Number(value);
+  if (isNaN(n)) return "--";
+  return n.toFixed(decimals);
+}
+
+function updateTime() {
+  setText("lastUpdate", new Date().toLocaleString("fr-FR"));
+}
+
+function colorEci(v) {
+  if (v >= 70) return "#dc2626";
+  if (v >= 35) return "#d97706";
+  return "#16a34a";
+}
+
+function setDecision(decision) {
+  const badge = document.getElementById("decisionBadge");
+
+  if (decision === "CRITICAL") {
+    badge.innerHTML = '<span class="badge badge-critical">CRITICAL</span>';
+  } else if (decision === "WARNING") {
+    badge.innerHTML = '<span class="badge badge-warning">WARNING</span>';
+  } else {
+    badge.innerHTML = '<span class="badge badge-normal">NORMAL</span>';
+  }
+}
+
+async function loadThingSpeak() {
+  try {
+    const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${READ_API_KEY}&results=5`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data.feeds || data.feeds.length === 0) {
+      setText("thingSpeakStatus", "Aucune donnée");
+      document.getElementById("thingSpeakStatus").className = "error";
+      return;
+    }
+
+    const f = data.feeds[data.feeds.length - 1];
+
+    setText("temp", fmt(f.field1, 1) + " °C");
+    setText("hum", fmt(f.field2, 1) + " %");
+    setText("lm35", fmt(f.field3, 1) + " °C");
+    setText("lum", fmt(f.field4, 1) + " %");
+    setText("motion", Number(f.field5) === 1 ? "Oui" : "Non");
+    setText("distance", fmt(f.field6, 1) + " cm");
+    setText("risk", fmt(f.field7, 0) + " %");
+    setText("alertCode", fmt(f.field8, 0));
+
+    setText("thingSpeakStatus", "Connecté");
+    document.getElementById("thingSpeakStatus").className = "ok";
+
+    updateTime();
+  } catch (e) {
+    console.error("Erreur ThingSpeak", e);
+    setText("thingSpeakStatus", "Erreur");
+    document.getElementById("thingSpeakStatus").className = "error";
+  }
+}
+
+async function loadAI() {
+  try {
+    const res = await fetch(API_FLASK + "/api/analyze");
+    const data = await res.json();
+
+    if (data.status !== "success") {
+      setText("backendStatus", "Erreur API");
+      document.getElementById("backendStatus").className = "error";
+      return;
+    }
+
+    setText("eci", fmt(data.latest_eci, 1) + " %");
+    setText("decision", data.latest_ai_decision);
+    setDecision(data.latest_ai_decision);
+    setText("anomaly", data.anomalies_detected);
+    setText("pred", fmt(data.next_temp_prediction, 2) + " °C");
+    setText("quality", fmt(data.data_quality_score, 0) + " %");
+    setText("recordsAnalyzed", data.records_analyzed);
+    setText("recordsSaved", data.records_saved);
+    setText("storageMode", data.storage_mode);
+
+    const q = Number(data.data_quality_score);
+    const bar = document.getElementById("qualityBar");
+    bar.style.width = Math.max(0, Math.min(100, q)) + "%";
+    bar.style.background = q >= 80 ? "#16a34a" : q >= 50 ? "#d97706" : "#dc2626";
+
+    setText("backendStatus", "Connecté");
+    document.getElementById("backendStatus").className = "ok";
+
+    updateTime();
+  } catch (e) {
+    console.error("Erreur Backend IA", e);
+    setText("backendStatus", "Indisponible");
+    document.getElementById("backendStatus").className = "error";
+  }
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch(API_FLASK + "/api/stats");
+    const json = await res.json();
+
+    if (json.status !== "success") return;
+
+    const s = json.stats;
+
+    setText("avgEci", fmt(s.avg_eci, 1) + " %");
+    setText("maxEci", fmt(s.max_eci, 1) + " %");
+    setText("avgRisk", fmt(s.avg_risk_score, 1) + " %");
+    setText("maxRisk", fmt(s.max_risk_score, 1) + " %");
+    setText("normalCount", s.normal_count);
+    setText("warningCount", s.warning_count);
+    setText("criticalCount", s.critical_count);
+    setText("minDistance", fmt(s.min_distance, 1) + " cm");
+
+    updateDiagnostic(s);
+    drawDecisionChart(s.normal_count, s.warning_count, s.critical_count);
+  } catch (e) {
+    console.error("Erreur stats", e);
+  }
+}
+
+async function loadTimeseries() {
+  try {
+    const res = await fetch(API_FLASK + "/api/timeseries");
+    const json = await res.json();
+
+    if (json.status !== "success") return;
+
+    const arr = json.data;
+
+    drawLineChart("tempChart", [
+      { label: "Température", values: arr.map(x => x.temp_dht), color: "#ef4444" },
+      { label: "Moyenne", values: arr.map(x => x.temp_moving_avg), color: "#2563eb" }
+    ]);
+
+    drawLineChart("eciChart", [
+      { label: "ECI", values: arr.map(x => x.environmental_criticality_index), color: "#7c3aed" }
+    ]);
+
+    drawLineChart("riskChart", [
+      { label: "Risk", values: arr.map(x => x.risk_score), color: "#d97706" },
+      { label: "Risk Avg", values: arr.map(x => x.risk_moving_avg), color: "#16a34a" }
+    ]);
+
+    updateHeatmap(arr);
+  } catch (e) {
+    console.error("Erreur timeseries", e);
+  }
+}
+
+async function loadAlerts() {
+  try {
+    const res = await fetch(API_FLASK + "/api/alerts");
+    const json = await res.json();
+
+    if (json.status !== "success") return;
+
+    setText("alertsCount", json.alerts_count);
+    updateAlerts(json.alerts);
+  } catch (e) {
+    console.error("Erreur alerts", e);
+  }
+}
+
+function drawLineChart(canvasId, series) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const pad = 40;
+  const w = canvas.width - pad * 2;
+  const h = canvas.height - pad * 2;
+
+  const all = [];
+  series.forEach(s => s.values.forEach(v => {
+    const n = Number(v);
+    if (!isNaN(n)) all.push(n);
+  }));
+
+  if (all.length < 2) return;
+
+  const min = Math.min(...all);
+  const max = Math.max(...all);
+  const range = max - min || 1;
+
+  ctx.strokeStyle = "#e5e7eb";
+  for (let i = 0; i <= 5; i++) {
+    const y = pad + i * h / 5;
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(canvas.width - pad, y);
+    ctx.stroke();
+  }
+
+  series.forEach(s => {
+    ctx.beginPath();
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 3;
+
+    s.values.forEach((v, i) => {
+      const x = pad + i * w / (s.values.length - 1);
+      const y = pad + h - ((Number(v) - min) / range) * h;
+
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+
+    ctx.stroke();
+  });
+}
+
+function drawDecisionChart(normal, warning, critical) {
+  const canvas = document.getElementById("decisionChart");
+  const ctx = canvas.getContext("2d");
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const data = [
+    { label: "NORMAL", value: Number(normal), color: "#16a34a" },
+    { label: "WARNING", value: Number(warning), color: "#d97706" },
+    { label: "CRITICAL", value: Number(critical), color: "#dc2626" }
+  ];
+
+  const max = Math.max(...data.map(x => x.value), 1);
+
+  data.forEach((d, i) => {
+    const y = 60 + i * 70;
+    const width = (d.value / max) * 430;
+
+    ctx.fillStyle = d.color;
+    ctx.fillRect(140, y, width, 35);
+
+    ctx.fillStyle = "#111827";
+    ctx.font = "16px Arial";
+    ctx.fillText(d.label, 30, y + 24);
+    ctx.fillText(d.value, 150 + width, y + 24);
+  });
+}
+
+function updateHeatmap(arr) {
+  const h = document.getElementById("heatmap");
+  h.innerHTML = "";
+
+  arr.forEach(x => {
+    const eci = Number(x.environmental_criticality_index);
+    const cell = document.createElement("div");
+    cell.className = "heat-cell";
+    cell.style.background = colorEci(eci);
+    cell.innerText = Math.round(eci);
+    h.appendChild(cell);
+  });
+}
+
+function updateDiagnostic(s) {
+  const box = document.getElementById("diagnostic");
+
+  box.className = "diagnostic";
+
+  if (s.latest_ai_decision === "CRITICAL") {
+    box.classList.add("diag-critical");
+    box.innerText = `Situation critique détectée. ECI actuel : ${s.latest_eci} %. ${s.anomalies_detected} anomalies détectées. Intervention recommandée.`;
+  } else if (s.latest_ai_decision === "WARNING") {
+    box.classList.add("diag-warning");
+    box.innerText = `Situation à surveiller. ECI actuel : ${s.latest_eci} %. ${s.anomalies_detected} anomalies détectées. Surveillance renforcée recommandée.`;
+  } else {
+    box.classList.add("diag-normal");
+    box.innerText = `Situation normale. ECI actuel : ${s.latest_eci} %. ${s.anomalies_detected} anomalies statistiques détectées, mais pas de criticité opérationnelle immédiate.`;
+  }
+}
+
+function updateAlerts(alerts) {
+  const list = document.getElementById("alertsList");
+  list.innerHTML = "";
+
+  if (!alerts || alerts.length === 0) {
+    list.innerText = "Aucune alerte IA.";
+    return;
+  }
+
+  alerts.slice(0, 12).forEach(a => {
+    const div = document.createElement("div");
+    div.className = "alert-item";
+
+    div.innerHTML = `
+      <div class="alert-title">
+        Entrée #${a.entry_id} - ${a.ai_decision} - ${a.anomaly_label}
+      </div>
+      <div class="alert-meta">
+        Date : ${a.created_at}<br>
+        Température : ${fmt(a.temp_dht, 1)} °C |
+        Humidité : ${fmt(a.humidity, 1)} % |
+        Risk : ${fmt(a.risk_score, 0)} % |
+        ECI : ${fmt(a.environmental_criticality_index, 1)} %
+      </div>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+async function refreshAll() {
+  await loadThingSpeak();
+  await loadAI();
+  await loadStats();
+  await loadTimeseries();
+  await loadAlerts();
+}
+
+refreshAll();
+
+setInterval(loadThingSpeak, 15000);
+setInterval(refreshAll, 45000);
+</script>
+
+</body>
+</html>
